@@ -1,0 +1,55 @@
+name: Extract Vela project
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "vela-completa-modificada.zip"
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract Vela
+        run: |
+          rm -rf /tmp/vela
+          mkdir -p /tmp/vela
+
+          unzip -q "vela-completa-modificada.zip" -d /tmp/vela
+
+          ROOT="/tmp/vela/vela_completo"
+
+          if [ ! -d "$ROOT" ]; then
+            echo "ERROR: No se encontró la carpeta vela_completo dentro del ZIP."
+            find /tmp/vela -maxdepth 2 -type d
+            exit 1
+          fi
+
+          cp -a "$ROOT"/. .
+
+          rm -f "vela-completa-modificada.zip"
+
+          echo "Proyecto Vela extraído correctamente."
+          echo "Contenido:"
+          ls -la
+
+      - name: Commit organized project
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "No hay cambios para guardar."
+          else
+            git commit -m "Organize Vela project"
+            git push
+          fi

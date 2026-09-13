@@ -1,10 +1,10 @@
 name: Extract Vela project
 
 on:
-  workflow_dispatch:
   push:
-    paths:
-      - "vela-completa-modificada.zip"
+    branches:
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -19,6 +19,11 @@ jobs:
 
       - name: Extract Vela
         run: |
+          if [ ! -f "vela-completa-modificada.zip" ]; then
+            echo "El ZIP ya fue procesado. No hay nada que extraer."
+            exit 0
+          fi
+
           rm -rf /tmp/vela
           mkdir -p /tmp/vela
 
